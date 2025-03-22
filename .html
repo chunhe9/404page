@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - 页面迷航</title>
+    <style>
+        :root {
+            --primary: #308bd1;
+            --error: #ff4757;
+        }
+        body {
+            margin: 0;
+            background: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui;
+            overflow: hidden;
+        }
+        .error-container {
+            position: relative;
+            text-align: center;
+        }
+        .error-code {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            perspective: 1000px;
+        }
+        .error-code span {
+            font-size: 8rem;
+            font-weight: 900;
+            color: var(--error);
+            animation: 
+                fall 1s ease-out forwards,
+                glow 2s 1s infinite alternate;
+            opacity: 0;
+            transform: translateY(-100vh) rotateX(90deg);
+        }
+        @keyframes fall {
+            to {
+                opacity: 1;
+                transform: translateY(0) rotateX(0);
+            }
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 10px var(--error); }
+            to { text-shadow: 0 0 30px var(--error); }
+        }
+        .error-message {
+            color: #fff;
+            font-size: 1.5rem;
+            margin: 2rem 0;
+            line-height: 1.6;
+        }
+        .action-btn {
+            padding: 12px 32px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 
+                transform 0.3s ease,
+                box-shadow 0.3s ease;
+        }
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(48,139,209,0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code">
+            <span style="animation-delay: 0.1s">4</span>
+            <span style="animation-delay: 0.3s">0</span>
+            <span style="animation-delay: 0.5s">4</span>
+        </div>
+        
+        <p class="error-message">
+            目标页面已消失在数字海洋中<br>
+            <span id="countdown">5</span>秒后自动返回安全港
+        </p>
+        
+        <button class="action-btn" onclick="location.href='/'">返回母港</button>
+    </div>
+
+    <script>
+        // 倒计时跳转功能[2,5](@ref)
+        let count = 5;
+        const timer = setInterval(() => {
+            count--;
+            document.getElementById('countdown').textContent = count;
+            if(count <= 0) {
+                clearInterval(timer);
+                location.href = "/";
+            }
+        }, 1000);
+
+        // 动态粒子背景[9](@ref)（简化版）
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.style.position = 'fixed';
+        canvas.style.top = 0;
+        canvas.style.left = 0;
+        canvas.style.zIndex = -1;
+        document.body.prepend(canvas);
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // 粒子动画
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.alpha = Math.random() * 0.5 + 0.5;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255,255,255,${this.alpha})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 1, 0, Math.PI*2);
+                ctx.fill();
+            }
+        }
+
+        const particles = Array.from({length: 100}, () => new Particle());
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>
